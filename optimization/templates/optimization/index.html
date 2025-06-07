@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hydraulic Optimizer </title>
+<style>
+  /* Reset */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #e4f0ea;
+    color: #2c3e50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Container */
+  .dashboard {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    max-width: 900px;
+    background: #f7faf6;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0 2rem 2rem;
+  }
+
+  /* Pipe-themed background */
+  .pipes-background {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.1;
+  }
+
+  header {
+    background: #4a7c59;
+    color: #e6f0e6;
+    padding: 2rem 2rem;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-align: center;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    border-radius: 20px 20px 0 0;
+    z-index: 2;
+    position: relative;
+  }
+
+  main {
+    flex-grow: 1;
+    margin-top: 3rem;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  main h2 {
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: #4a7c59;
+    margin-bottom: 2rem;
+    text-align: center;
+    user-select: none;
+  }
+
+  /* Form styling */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+    max-width: 450px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  label {
+    font-weight: 600;
+    color: #3a5d3a;
+    font-size: 1.1rem;
+    user-select: none;
+  }
+
+  input[type="file"] {
+    padding: 0.7rem 1rem;
+    border-radius: 12px;
+    border: 2px solid #a3bfa0;
+    font-size: 1rem;
+    cursor: pointer;
+    background: #f0f8f0;
+    color: #3a5d3a;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  input[type="file"]:focus {
+    border-color: #2f5d2f;
+    box-shadow: 0 0 8px rgba(47,93,47,0.5);
+    outline: none;
+    background: #e6f0e6;
+  }
+
+  /* Optimization options container */
+  .options-container {
+    display: none; /* Hidden until file is uploaded */
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+
+  .options-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #4a7c59;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  /* Optimization method cards */
+  .method-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .method-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 2px solid #d1e3ce;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .method-card:hover {
+    border-color: #4a7c59;
+    box-shadow: 0 4px 12px rgba(74, 124, 89, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .method-card.selected {
+    border-color: #4a7c59;
+    background-color: #f0f8f0;
+    box-shadow: 0 4px 12px rgba(74, 124, 89, 0.3);
+  }
+
+  .method-card.selected::after {
+    content: "✓";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #4a7c59;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+
+  .method-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #4a7c59;
+  }
+
+  .method-name {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-size: 1.2rem;
+  }
+
+  .method-abbr {
+    display: inline-block;
+    background: #4a7c59;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .method-desc {
+    font-size: 0.9rem;
+    color: #587e50;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* Algorithm parameters */
+  .parameters {
+    width: 100%;
+    margin-top: 1.5rem;
+    display: none;
+  }
+
+  .parameter-group {
+    margin-bottom: 1rem;
+  }
+
+  .parameter-group label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
+  }
+
+  .parameter-group input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #a3bfa0;
+    border-radius: 6px;
+  }
+
+  /* Buttons */
+  button {
+    background: #4a7c59;
+    color: #e6f0e6;
+    font-weight: 700;
+    font-size: 1.3rem;
+    padding: 0.85rem 0;
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(74,124,89,0.5);
+    user-select: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  button:hover,
+  button:focus {
+    background: #346638;
+    box-shadow: 0 10px 25px rgba(52,102,56,0.75);
+    outline: none;
+  }
+
+  .secondary-btn {
+    background: #aac7a1;
+    color: #2c3e50;
+    font-size: 1rem;
+    padding: 0.7rem 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+
+  .secondary-btn:hover,
+  .secondary-btn:focus {
+    background: #8bb08a;
+    color: #2c3e50;
+  }
+
+  /* Form actions */
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  /* About button */
+  .about-button {
+    position: absolute;
+    top: 1.8rem;
+    right: 2rem;
+    background: #aac7a1;
+    border: none;
+    border-radius: 12px;
+    padding: 0.4rem 1rem;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #2c3e50;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transition: background-color 0.3s ease;
+    z-index: 3;
+  }
+
+  .about-button:hover,
+  .about-button:focus {
+    background: #8bb08a;
+    outline: none;
+  }
+
+  footer {
+    background: #ddebd9;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #587e50;
+    font-weight: 600;
+    user-select: none;
+    border-radius: 0 0 20px 20px;
+    z-index: 2;
+  }
+
+  /* Modal styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0; top: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-content {
+    background: #f7faf6;
+    margin: 8% auto;
+    padding: 2rem;
+    border-radius: 16px;
+    max-width: 480px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    position: relative;
+    color: #2c3e50;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .modal-content h3 {
+    margin-top: 0;
+    color: #4a7c59;
+    font-weight: 700;
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 0.6rem;
+    right: 1rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #4a7c59;
+    background: none;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.3s ease;
+  }
+
+  .close-btn:hover,
+  .close-btn:focus {
+    color: #346638;
+    outline: none;
+  }
+
+  /* File upload feedback */
+  .file-feedback {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #4a7c59;
+    font-weight: 500;
+    display: none;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .dashboard {
+      border-radius: 0;
+      max-width: 100vw;
+      height: 100vh;
+      padding: 1rem 1.5rem 1.5rem;
+    }
+
+    header {
+      font-size: 1.6rem;
+      padding: 1.5rem 1.5rem;
+      border-radius: 0;
+    }
+
+    main h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    form {
+      max-width: 100%;
+      gap: 1.3rem;
+    }
+
+    .method-cards {
+      grid-template-columns: 1fr;
+    }
+
+    button {
+      font-size: 1.1rem;
+      padding: 0.75rem 0;
+      border-radius: 12px;
+    }
+
+    .about-button {
+      top: 1rem;
+      right: 1rem;
+      font-size: 0.9rem;
+      padding: 0.3rem 0.8rem;
+    }
+
+    footer {
+      font-size: 0.8rem;
+      padding: 0.8rem 1rem;
+      border-radius: 0;
+    }
+
+    .modal-content {
+      margin: 15% 1rem;
+      max-width: calc(100% - 2rem);
+      padding: 1.5rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="dashboard" role="main" aria-label="Hydraulic optimizer dashboard">
+
+    <!-- Decorative pipes background -->
+    <svg class="pipes-background" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 900 900" >
+      <defs>
+        <linearGradient id="pipeGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#6f9e6b" />
+          <stop offset="100%" stop-color="#aac7a1" />
+        </linearGradient>
+      </defs>
+      <!-- Pipes horizontal -->
+      <rect x="50" y="100" width="800" height="12" fill="url(#pipeGrad)" rx="6" ry="6"/>
+      <rect x="50" y="300" width="700" height="10" fill="url(#pipeGrad)" rx="5" ry="5"/>
+      <rect x="50" y="600" width="600" height="14" fill="url(#pipeGrad)" rx="7" ry="7"/>
+      <!-- Pipes vertical -->
+      <rect x="150" y="100" width="12" height="200" fill="url(#pipeGrad)" rx="6" ry="6"/>
+      <rect x="350" y="300" width="14" height="300" fill="url(#pipeGrad)" rx="7" ry="7"/>
+      <rect x="650" y="100" width="10" height="400" fill="url(#pipeGrad)" rx="5" ry="5"/>
+    </svg>
+
+    <header>
+      Hydraulic Optimizer
+      <button class="about-button" aria-haspopup="dialog" aria-controls="aboutModal" aria-expanded="false">About</button>
+    </header>
+
+    <main>
+      <h2>Upload INP File</h2>
+      <form method="POST" enctype="multipart/form-data" aria-label="Upload INP file form" id="uploadForm">
+        {% csrf_token %}
+        <div>
+          <label for="inpFile">Select EPANET .INP file:</label>
+          <input type="file" id="inpFile" name="inp_file" accept=".inp" required>
+          <div class="file-feedback" id="fileFeedback"></div>
+        </div>
+        <button type="button" id="uploadBtn" aria-label="Upload file">Upload File</button>
+      </form>
+
+      <!-- Optimization options (hidden until file is uploaded) -->
+      <div class="options-container" id="optionsContainer">
+        <div class="options-title">Select Optimization Algorithm</div>
+        
+        <div class="method-cards">
+          <!-- Genetic Algorithm Card -->
+          <div class="method-card" data-method="ga">
+            <div class="method-icon">🧬</div>
+            <div class="method-name">Genetic Algorithm</div>
+            <div class="method-abbr">GA</div>
+            <div class="method-desc">
+              Mimics natural selection to find optimal solutions through generations of candidate solutions
+            </div>
+            <div class="parameters" id="ga-params">
+              <div class="parameter-group">
+                <label for="ga-population">Population Size:</label>
+                <input type="number" id="ga-population" name="ga_population" min="10" max="500" value="100">
+              </div>
+              <div class="parameter-group">
+                <label for="ga-generations">Generations:</label>
+                <input type="number" id="ga-generations" name="ga_generations" min="10" max="1000" value="100">
+              </div>
+              <div class="parameter-group">
+                <label for="ga-mutation">Mutation Rate:</label>
+                <input type="number" id="ga-mutation" name="ga_mutation" min="0" max="1" step="0.01" value="0.1">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Ant Colony Optimization Card -->
+          <div class="method-card" data-method="aco">
+            <div class="method-icon">🐜</div>
+            <div class="method-name">Ant Colony Optimization</div>
+            <div class="method-abbr">ACO</div>
+            <div class="method-desc">
+              Inspired by ant behavior, uses pheromone trails to find optimal paths through the network
+            </div>
+            <div class="parameters" id="aco-params">
+              <div class="parameter-group">
+                <label for="aco-ants">Number of Ants:</label>
+                <input type="number" id="aco-ants" name="aco_ants" min="5" max="200" value="50">
+              </div>
+              <div class="parameter-group">
+                <label for="aco-iterations">Iterations:</label>
+                <input type="number" id="aco-iterations" name="aco_iterations" min="10" max="500" value="100">
+              </div>
+              <div class="parameter-group">
+                <label for="aco-evaporation">Evaporation Rate:</label>
+                <input type="number" id="aco-evaporation" name="aco_evaporation" min="0" max="1" step="0.01" value="0.5">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Particle Swarm Optimization Card -->
+          <div class="method-card" data-method="pso">
+            <div class="method-icon">🌀</div>
+            <div class="method-name">Particle Swarm Optimization</div>
+            <div class="method-abbr">PSO</div>
+            <div class="method-desc">
+              Simulates social behavior of birds flocking to find optimal solutions in the search space
+            </div>
+            <div class="parameters" id="pso-params">
+              <div class="parameter-group">
+                <label for="pso-particles">Particles:</label>
+                <input type="number" id="pso-particles" name="pso_particles" min="10" max="500" value="50">
+              </div>
+              <div class="parameter-group">
+                <label for="pso-iterations">Iterations:</label>
+                <input type="number" id="pso-iterations" name="pso_iterations" min="10" max="1000" value="200">
+              </div>
+              <div class="parameter-group">
+                <label for="pso-inertia">Inertia Weight:</label>
+                <input type="number" id="pso-inertia" name="pso_inertia" min="0" max="1" step="0.01" value="0.7">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" id="backBtn" class="secondary-btn">Back</button>
+          <button type="submit" id="optimizeBtn" form="uploadForm" disabled>Run Optimization</button>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      &copy; 2025 Hydraulic Optimizer &nbsp;&middot;&nbsp; Crafted with Eng. Kimathi
+    </footer>
+  </div>
+
+  <!-- About Modal -->
+  <div id="aboutModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
+    <div class="modal-content">
+      <button class="close-btn" aria-label="Close about modal">&times;</button>
+      <h3 id="modalTitle">About Hydraulic Optimizer</h3>
+      <p id="modalDesc">
+        The Hydraulic Optimizer helps engineers optimize water distribution networks using advanced algorithms.
+        Upload your EPANET .INP file and choose between three powerful optimization methods:
+      </p>
+      <ul>
+        <li><strong>Genetic Algorithm (GA):</strong> Evolutionary approach that mimics natural selection</li>
+        <li><strong>Ant Colony Optimization (ACO):</strong> Inspired by ant foraging behavior</li>
+        <li><strong>Particle Swarm Optimization (PSO):</strong> Simulates social behavior of bird flocking</li>
+      </ul>
+      <p>
+        Each algorithm includes customizable parameters to fine-tune the optimization process for your specific network requirements.
+      </p>
+    </div>
+  </div>
+
+<script>
+  // DOM elements
+  const uploadForm = document.getElementById('uploadForm');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const inpFile = document.getElementById('inpFile');
+  const fileFeedback = document.getElementById('fileFeedback');
+  const optionsContainer = document.getElementById('optionsContainer');
+  const backBtn = document.getElementById('backBtn');
+  const optimizeBtn = document.getElementById('optimizeBtn');
+  const methodCards = document.querySelectorAll('.method-card');
+  
+  // Modal elements
+  const aboutBtn = document.querySelector('.about-button');
+  const modal = document.getElementById('aboutModal');
+  const closeBtn = modal.querySelector('.close-btn');
+
+  // Track selected method
+  let selectedMethod = null;
+
+  // File upload handler
+  uploadBtn.addEventListener('click', () => {
+    if (inpFile.files.length > 0) {
+      const fileName = inpFile.files[0].name;
+      fileFeedback.textContent = `File ready: ${fileName}`;
+      fileFeedback.style.display = 'block';
+      
+      // Show optimization options
+      uploadForm.style.display = 'none';
+      optionsContainer.style.display = 'block';
+    } else {
+      fileFeedback.textContent = 'Please select a file first';
+      fileFeedback.style.display = 'block';
+    }
+  });
+
+  // Back button handler
+  backBtn.addEventListener('click', () => {
+    optionsContainer.style.display = 'none';
+    uploadForm.style.display = 'flex';
+    selectedMethod = null;
+    optimizeBtn.disabled = true;
+    
+    // Remove selected class from all cards and hide parameters
+    methodCards.forEach(card => {
+      card.classList.remove('selected');
+      const params = card.querySelector('.parameters');
+      params.style.display = 'none';
+    });
+  });
+
+  // Method selection handler
+  methodCards.forEach(card => {
+    card.addEventListener('click', () => {
+      // Remove selected class from all cards and hide parameters
+      methodCards.forEach(c => {
+        c.classList.remove('selected');
+        const params = c.querySelector('.parameters');
+        params.style.display = 'none';
+      });
+      
+      // Add selected class to clicked card and show parameters
+      card.classList.add('selected');
+      const params = card.querySelector('.parameters');
+      params.style.display = 'block';
+      
+      selectedMethod = card.getAttribute('data-method');
+      optimizeBtn.disabled = false;
+      
+      // Update the form with the selected method
+      const methodInput = document.createElement('input');
+      methodInput.type = 'hidden';
+      methodInput.name = 'optimization_method';
+      methodInput.value = selectedMethod;
+      
+      // Remove existing method input if any
+      const existingInput = uploadForm.querySelector('input[name="optimization_method"]');
+      if (existingInput) {
+        uploadForm.removeChild(existingInput);
+      }
+      
+      uploadForm.appendChild(methodInput);
+    });
+  });
+
+  // Modal open and close logic
+  aboutBtn.addEventListener('click', () => {
+    modal.style.display = 'block';
+    aboutBtn.setAttribute('aria-expanded', 'true');
+    closeBtn.focus();
+  });
+
+  closeBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+    aboutBtn.setAttribute('aria-expanded', 'false');
+    aboutBtn.focus();
+  });
+
+  window.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+      aboutBtn.setAttribute('aria-expanded', 'false');
+      aboutBtn.focus();
+    }
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display === 'block') {
+      modal.style.display = 'none';
+      aboutBtn.setAttribute('aria-expanded', 'false');
+      aboutBtn.focus();
+    }
+  });
+</script>
+
+</body>
+</html>
