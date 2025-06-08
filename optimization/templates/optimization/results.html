@@ -1,4 +1,5 @@
 {% load dict_extras %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -146,6 +147,24 @@
       padding-top: 20px;
       border-top: 1px solid #eee;
     }
+    .best-algorithm {
+      background-color: #e6f7e6;
+      border-left: 4px solid #28a745;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .chart-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin: 0 -10px;
+    }
+    .chart-col {
+      flex: 1;
+      min-width: 300px;
+      padding: 0 10px;
+      margin-bottom: 20px;
+    }
     
     @media (max-width: 640px) {
       body {
@@ -172,11 +191,16 @@
         font-size: 0.9rem;
         margin-bottom: 5px;
       }
+      .chart-col {
+        min-width: 100%;
+      }
     }
   </style>
   
   <!-- Load Chart.js from CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Load Plotly for additional charts -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
   <h2>Optimization Results</h2>
@@ -190,6 +214,19 @@
     {% endfor %}
     <button class="comparison-btn" id="showComparison">Compare All Algorithms</button>
   </div>
+  
+  <!-- Determine best algorithm -->
+  {% with best_algo=all_results|dict_get_best_algorithm|default:all_results.items|first %}
+  <div class="best-algorithm">
+    <h3>Recommended Optimization</h3>
+    <p>Based on performance metrics, the <strong>{{ best_algo.0|upper }}</strong> algorithm is recommended as it provides:</p>
+    <ul>
+      <li>{{ best_algo.1.pressure_improvement|floatformat:2 }}% pressure improvement</li>
+      <li>{{ best_algo.1.cost_reduction|floatformat:2 }}% cost reduction</li>
+      <li>Completed in {{ best_algo.1.execution_time|floatformat:2 }} seconds</li>
+    </ul>
+  </div>
+  {% endwith %}
   
   <!-- Comparison section -->
   <div class="comparison-section" id="comparisonSection">
@@ -206,21 +243,21 @@
         </thead>
         <tbody>
           <tr>
-            <td>Execution Time</td>
+            <td>Execution Time (s)</td>
             {% for algorithm, results in all_results.items %}
-              <td>{{ results.execution_time|floatformat:2 }}s</td>
+              <td>{{ results.execution_time|floatformat:2 }}</td>
             {% endfor %}
           </tr>
           <tr>
-            <td>Pressure Improvement</td>
+            <td>Pressure Improvement (%)</td>
             {% for algorithm, results in all_results.items %}
-              <td>{{ results.pressure_improvement|floatformat:2 }}%</td>
+              <td>{{ results.pressure_improvement|floatformat:2 }}</td>
             {% endfor %}
           </tr>
           <tr>
-            <td>Cost Reduction</td>
+            <td>Cost Reduction (%)</td>
             {% for algorithm, results in all_results.items %}
-              <td>{{ results.cost_reduction|floatformat:2 }}%</td>
+              <td>{{ results.cost_reduction|floatformat:2 }}</td>
             {% endfor %}
           </tr>
         </tbody>
@@ -229,6 +266,7 @@
     <div class="chart-container">
       <canvas id="comparisonChart" height="300"></canvas>
     </div>
+    <div id="performanceRadarChart" class="chart-container"></div>
   </div>
   
   <!-- Tab content for each algorithm -->
@@ -239,6 +277,36 @@
         <p>Execution time: <strong>{{ results.execution_time|floatformat:2 }} seconds</strong></p>
         <p>Pressure improvement: <strong>{{ results.pressure_improvement|floatformat:2 }}%</strong></p>
         <p>Cost reduction: <strong>{{ results.cost_reduction|floatformat:2 }}%</strong></p>
+      </div>
+      
+      <div class="chart-row">
+        <div class="chart-col">
+          <h4>Top 10 Nodes by Pressure</h4>
+          <div class="chart-container">
+            <canvas id="{{ algorithm }}-pressureBarChart" height="300"></canvas>
+          </div>
+        </div>
+        <div class="chart-col">
+          <h4>Pressure Distribution</h4>
+          <div class="chart-container">
+            <canvas id="{{ algorithm }}-pressurePieChart" height="300"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <div class="chart-row">
+        <div class="chart-col">
+          <h4>Top 10 Links by Flowrate</h4>
+          <div class="chart-container">
+            <canvas id="{{ algorithm }}-flowrateBarChart" height="300"></canvas>
+          </div>
+        </div>
+        <div class="chart-col">
+          <h4>Flowrate Distribution</h4>
+          <div class="chart-container">
+            <canvas id="{{ algorithm }}-flowratePieChart" height="300"></canvas>
+          </div>
+        </div>
       </div>
       
       {% if results.pressure_summary %}
@@ -266,8 +334,9 @@
           </table>
         </div>
         
+        <h4>Pressure Histogram</h4>
         <div class="chart-container">
-          <canvas id="{{ algorithm }}-pressureChart" height="300"></canvas>
+          <canvas id="{{ algorithm }}-pressureHistogram" height="300"></canvas>
         </div>
       {% endif %}
 
@@ -296,8 +365,9 @@
           </table>
         </div>
         
+        <h4>Flowrate Histogram</h4>
         <div class="chart-container">
-          <canvas id="{{ algorithm }}-flowrateChart" height="300"></canvas>
+          <canvas id="{{ algorithm }}-flowrateHistogram" height="300"></canvas>
         </div>
       {% endif %}
 
@@ -326,8 +396,9 @@
           </table>
         </div>
         
+        <h4>Demand Distribution</h4>
         <div class="chart-container">
-          <canvas id="{{ algorithm }}-demandChart" height="300"></canvas>
+          <canvas id="{{ algorithm }}-demandPieChart" height="300"></canvas>
         </div>
       {% endif %}
 
@@ -342,16 +413,20 @@
 
       {% if results.plots %}
         <h3>Network Visualizations</h3>
-
-        {% if results.plots.pressure %}
-          <h4>Pressure Map</h4>
-          <img src="{{ results.plots.pressure }}" alt="Pressure Plot" loading="lazy">
-        {% endif %}
-
-        {% if results.plots.flowrate %}
-          <h4>Flowrate Map</h4>
-          <img src="{{ results.plots.flowrate }}" alt="Flowrate Plot" loading="lazy">
-        {% endif %}
+        <div class="chart-row">
+          {% if results.plots.pressure %}
+            <div class="chart-col">
+              <h4>Pressure Map</h4>
+              <img src="{{ results.plots.pressure }}" alt="Pressure Plot" loading="lazy">
+            </div>
+          {% endif %}
+          {% if results.plots.flowrate %}
+            <div class="chart-col">
+              <h4>Flowrate Map</h4>
+              <img src="{{ results.plots.flowrate }}" alt="Flowrate Plot" loading="lazy">
+            </div>
+          {% endif %}
+        </div>
       {% endif %}
     </div>
   {% endfor %}
@@ -384,219 +459,207 @@
         comparisonSection.style.display = 'block';
         this.textContent = 'Hide Comparison';
         renderComparisonChart();
+        renderRadarChart();
       }
     });
     
     // Render charts for each algorithm
     {% for algorithm, results in all_results.items %}
       {% if results.pressure_summary %}
-        const {{ algorithm }}PressureLabels = {{ results.pressure_summary.mean_pressure.keys|safe }};
-        const {{ algorithm }}PressureMean = {
-          {% for node in results.pressure_summary.mean_pressure.keys %}
-            "{{ node }}": {{ results.pressure_summary.mean_pressure|get:node }},
-          {% endfor %}
-        };
-        const {{ algorithm }}PressureMin = {
-          {% for node in results.pressure_summary.min_pressure.keys %}
-            "{{ node }}": {{ results.pressure_summary.min_pressure|get:node }},
-          {% endfor %}
-        };
-        const {{ algorithm }}PressureMax = {
-          {% for node in results.pressure_summary.max_pressure.keys %}
-            "{{ node }}": {{ results.pressure_summary.max_pressure|get:node }},
-          {% endfor %}
-        };
-
-        const {{ algorithm }}PressureChartLabels = {{ algorithm }}PressureLabels;
-        const {{ algorithm }}PressureMeanData = {{ algorithm }}PressureLabels.map(
-          label => parseFloat({{ algorithm }}PressureMean[label].toFixed(2)));
-        const {{ algorithm }}PressureMinData = {{ algorithm }}PressureLabels.map(
-          label => parseFloat({{ algorithm }}PressureMin[label].toFixed(2)));
-        const {{ algorithm }}PressureMaxData = {{ algorithm }}PressureLabels.map(
-          label => parseFloat({{ algorithm }}PressureMax[label].toFixed(2)));
-
-        const ctx{{ algorithm }}Pressure = document.getElementById('{{ algorithm }}-pressureChart').getContext('2d');
-        new Chart(ctx{{ algorithm }}Pressure, {
-          type: 'bar',
-          data: {
-            labels: {{ algorithm }}PressureChartLabels,
-            datasets: [
-              {
-                label: 'Mean Pressure (psi)',
-                data: {{ algorithm }}PressureMeanData,
+        // Pressure Bar Chart (Top 10 Nodes)
+        const {{ algorithm }}TopPressureLabels = Object.entries({{ results.pressure_summary.mean_pressure|safe }})
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10)
+          .map(item => item[0]);
+        const {{ algorithm }}TopPressureValues = Object.entries({{ results.pressure_summary.mean_pressure|safe }})
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10)
+          .map(item => item[1]);
+        
+        new Chart(
+          document.getElementById('{{ algorithm }}-pressureBarChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: {{ algorithm }}TopPressureLabels,
+              datasets: [{
+                label: 'Pressure (psi)',
+                data: {{ algorithm }}TopPressureValues,
                 backgroundColor: 'rgba(54, 162, 235, 0.6)',
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1
-              },
-              {
-                label: 'Min Pressure (psi)',
-                data: {{ algorithm }}PressureMinData,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-              },
-              {
-                label: 'Max Pressure (psi)',
-                data: {{ algorithm }}PressureMaxData,
-                backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              y: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'Pressure (psi)'
+              }]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  title: { display: true, text: 'Pressure (psi)' }
                 }
               }
             }
           }
-        });
+        );
+        
+        // Pressure Pie Chart (Distribution)
+        const {{ algorithm }}PressureBins = {
+          '0-20 psi': Object.values({{ results.pressure_summary.mean_pressure|safe }}).filter(v => v <= 20).length,
+          '20-40 psi': Object.values({{ results.pressure_summary.mean_pressure|safe }}).filter(v => v > 20 && v <= 40).length,
+          '40-60 psi': Object.values({{ results.pressure_summary.mean_pressure|safe }}).filter(v => v > 40 && v <= 60).length,
+          '60-80 psi': Object.values({{ results.pressure_summary.mean_pressure|safe }}).filter(v => v > 60 && v <= 80).length,
+          '80+ psi': Object.values({{ results.pressure_summary.mean_pressure|safe }}).filter(v => v > 80).length
+        };
+        
+        new Chart(
+          document.getElementById('{{ algorithm }}-pressurePieChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+              labels: Object.keys({{ algorithm }}PressureBins),
+              datasets: [{
+                data: Object.values({{ algorithm }}PressureBins),
+                backgroundColor: [
+                  'rgba(255, 99, 132, 0.6)',
+                  'rgba(54, 162, 235, 0.6)',
+                  'rgba(255, 206, 86, 0.6)',
+                  'rgba(75, 192, 192, 0.6)',
+                  'rgba(153, 102, 255, 0.6)'
+                ]
+              }]
+            }
+          }
+        );
+        
+        // Pressure Histogram
+        new Chart(
+          document.getElementById('{{ algorithm }}-pressureHistogram').getContext('2d'), {
+            type: 'histogram',
+            data: {
+              datasets: [{
+                label: 'Pressure Distribution',
+                data: Object.values({{ results.pressure_summary.mean_pressure|safe }}),
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                y: { title: { display: true, text: 'Frequency' } },
+                x: { title: { display: true, text: 'Pressure (psi)' } }
+              }
+            }
+          }
+        );
       {% endif %}
 
       {% if results.flowrate_summary %}
-        const {{ algorithm }}FlowrateLabels = {{ results.flowrate_summary.mean_flowrate.keys|safe }};
-        const {{ algorithm }}FlowrateMean = {
-          {% for link in results.flowrate_summary.mean_flowrate.keys %}
-            "{{ link }}": {{ results.flowrate_summary.mean_flowrate|get:link }},
-          {% endfor %}
-        };
-        const {{ algorithm }}FlowrateMin = {
-          {% for link in results.flowrate_summary.min_flowrate.keys %}
-            "{{ link }}": {{ results.flowrate_summary.min_flowrate|get:link }},
-          {% endfor %}
-        };
-        const {{ algorithm }}FlowrateMax = {
-          {% for link in results.flowrate_summary.max_flowrate.keys %}
-            "{{ link }}": {{ results.flowrate_summary.max_flowrate|get:link }},
-          {% endfor %}
-        };
-
-        const {{ algorithm }}FlowrateChartLabels = {{ algorithm }}FlowrateLabels;
-        const {{ algorithm }}FlowrateMeanData = {{ algorithm }}FlowrateLabels.map(
-          label => parseFloat({{ algorithm }}FlowrateMean[label].toFixed(4)));
-        const {{ algorithm }}FlowrateMinData = {{ algorithm }}FlowrateLabels.map(
-          label => parseFloat({{ algorithm }}FlowrateMin[label].toFixed(4)));
-        const {{ algorithm }}FlowrateMaxData = {{ algorithm }}FlowrateLabels.map(
-          label => parseFloat({{ algorithm }}FlowrateMax[label].toFixed(4)));
-
-        const ctx{{ algorithm }}Flowrate = document.getElementById('{{ algorithm }}-flowrateChart').getContext('2d');
-        new Chart(ctx{{ algorithm }}Flowrate, {
-          type: 'bar',
-          data: {
-            labels: {{ algorithm }}FlowrateChartLabels,
-            datasets: [
-              {
-                label: 'Mean Flowrate (m³/s)',
-                data: {{ algorithm }}FlowrateMeanData,
-                backgroundColor: 'rgba(153, 102, 255, 0.6)',
-                borderColor: 'rgba(153, 102, 255, 1)',
-                borderWidth: 1
-              },
-              {
-                label: 'Min Flowrate (m³/s)',
-                data: {{ algorithm }}FlowrateMinData,
-                backgroundColor: 'rgba(255, 206, 86, 0.6)',
-                borderColor: 'rgba(255, 206, 86, 1)',
-                borderWidth: 1
-              },
-              {
-                label: 'Max Flowrate (m³/s)',
-                data: {{ algorithm }}FlowrateMaxData,
-                backgroundColor: 'rgba(255, 159, 64, 0.6)',
-                borderColor: 'rgba(255, 159, 64, 1)',
-                borderWidth: 1
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              y: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'Flowrate (m³/s)'
-                }
-              }
-            }
-          }
-        });
-      {% endif %}
-
-      {% if results.demand_summary %}
-        const {{ algorithm }}DemandLabels = {{ results.demand_summary.mean_demand.keys|safe }};
-        const {{ algorithm }}DemandMean = {
-          {% for node in results.demand_summary.mean_demand.keys %}
-            "{{ node }}": {{ results.demand_summary.mean_demand|get:node }},
-          {% endfor %}
-        };
-        const {{ algorithm }}DemandMin = {
-          {% for node in results.demand_summary.min_demand.keys %}
-            "{{ node }}": {{ results.demand_summary.min_demand|get:node }},
-          {% endfor %}
-        };
-        const {{ algorithm }}DemandMax = {
-          {% for node in results.demand_summary.max_demand.keys %}
-            "{{ node }}": {{ results.demand_summary.max_demand|get:node }},
-          {% endfor %}
-        };
-
-        const {{ algorithm }}DemandChartLabels = {{ algorithm }}DemandLabels;
-        const {{ algorithm }}DemandMeanData = {{ algorithm }}DemandLabels.map(
-          label => parseFloat({{ algorithm }}DemandMean[label].toFixed(4)));
-        const {{ algorithm }}DemandMinData = {{ algorithm }}DemandLabels.map(
-          label => parseFloat({{ algorithm }}DemandMin[label].toFixed(4)));
-        const {{ algorithm }}DemandMaxData = {{ algorithm }}DemandLabels.map(
-          label => parseFloat({{ algorithm }}DemandMax[label].toFixed(4)));
-
-        const ctx{{ algorithm }}Demand = document.getElementById('{{ algorithm }}-demandChart').getContext('2d');
-        new Chart(ctx{{ algorithm }}Demand, {
-          type: 'bar',
-          data: {
-            labels: {{ algorithm }}DemandChartLabels,
-            datasets: [
-              {
-                label: 'Mean Demand (m³/s)',
-                data: {{ algorithm }}DemandMeanData,
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-              },
-              {
-                label: 'Min Demand (m³/s)',
-                data: {{ algorithm }}DemandMinData,
+        // Flowrate Bar Chart (Top 10 Links)
+        const {{ algorithm }}TopFlowrateLabels = Object.entries({{ results.flowrate_summary.mean_flowrate|safe }})
+          .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+          .slice(0, 10)
+          .map(item => item[0]);
+        const {{ algorithm }}TopFlowrateValues = Object.entries({{ results.flowrate_summary.mean_flowrate|safe }})
+          .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+          .slice(0, 10)
+          .map(item => item[1]);
+        
+        new Chart(
+          document.getElementById('{{ algorithm }}-flowrateBarChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: {{ algorithm }}TopFlowrateLabels,
+              datasets: [{
+                label: 'Flowrate (m³/s)',
+                data: {{ algorithm }}TopFlowrateValues,
                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
-              },
-              {
-                label: 'Max Demand (m³/s)',
-                data: {{ algorithm }}DemandMaxData,
-                backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              y: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'Demand (m³/s)'
+              }]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                y: {
+                  title: { display: true, text: 'Flowrate (m³/s)' }
                 }
               }
             }
           }
-        });
+        );
+        
+        // Flowrate Pie Chart (Direction Distribution)
+        const {{ algorithm }}FlowDirection = {
+          'Positive Flow': Object.values({{ results.flowrate_summary.mean_flowrate|safe }}).filter(v => v > 0).length,
+          'Negative Flow': Object.values({{ results.flowrate_summary.mean_flowrate|safe }}).filter(v => v < 0).length,
+          'Zero Flow': Object.values({{ results.flowrate_summary.mean_flowrate|safe }}).filter(v => v === 0).length
+        };
+        
+        new Chart(
+          document.getElementById('{{ algorithm }}-flowratePieChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+              labels: Object.keys({{ algorithm }}FlowDirection),
+              datasets: [{
+                data: Object.values({{ algorithm }}FlowDirection),
+                backgroundColor: [
+                  'rgba(54, 162, 235, 0.6)',
+                  'rgba(255, 99, 132, 0.6)',
+                  'rgba(201, 203, 207, 0.6)'
+                ]
+              }]
+            }
+          }
+        );
+        
+        // Flowrate Histogram
+        new Chart(
+          document.getElementById('{{ algorithm }}-flowrateHistogram').getContext('2d'), {
+            type: 'histogram',
+            data: {
+              datasets: [{
+                label: 'Flowrate Distribution',
+                data: Object.values({{ results.flowrate_summary.mean_flowrate|safe }}),
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                y: { title: { display: true, text: 'Frequency' } },
+                x: { title: { display: true, text: 'Flowrate (m³/s)' } }
+              }
+            }
+          }
+        );
+      {% endif %}
+
+      {% if results.demand_summary %}
+        // Demand Pie Chart
+        const {{ algorithm }}DemandBins = {
+          'Low Demand': Object.values({{ results.demand_summary.mean_demand|safe }}).filter(v => v <= 0.001).length,
+          'Medium Demand': Object.values({{ results.demand_summary.mean_demand|safe }}).filter(v => v > 0.001 && v <= 0.005).length,
+          'High Demand': Object.values({{ results.demand_summary.mean_demand|safe }}).filter(v => v > 0.005).length
+        };
+        
+        new Chart(
+          document.getElementById('{{ algorithm }}-demandPieChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+              labels: Object.keys({{ algorithm }}DemandBins),
+              datasets: [{
+                data: Object.values({{ algorithm }}DemandBins),
+                backgroundColor: [
+                  'rgba(54, 162, 235, 0.6)',
+                  'rgba(255, 206, 86, 0.6)',
+                  'rgba(255, 99, 132, 0.6)'
+                ]
+              }]
+            }
+          }
+        );
       {% endif %}
     {% endfor %}
     
@@ -650,6 +713,66 @@
         }
       });
     }
+    
+    // Render radar chart for performance comparison
+    function renderRadarChart() {
+      const algorithms = [{% for algorithm in all_results.keys %}'{{ algorithm|upper }}',{% endfor %}];
+      const metrics = ['Execution Time', 'Pressure Improvement', 'Cost Reduction'];
+      
+      // Normalize data for radar chart (0-100 scale)
+      const normalize = (values, inverse = false) => {
+        const max = Math.max(...values);
+        const min = Math.min(...values);
+        return values.map(v => {
+          if (max === min) return 50;
+          const normalized = ((v - min) / (max - min)) * 100;
+          return inverse ? 100 - normalized : normalized;
+        });
+      };
+      
+      const executionTimes = normalize([{% for algorithm, results in all_results.items %}{{ results.execution_time }},{% endfor %}], true);
+      const pressureImprovements = normalize([{% for algorithm, results in all_results.items %}{{ results.pressure_improvement }},{% endfor %}]);
+      const costReductions = normalize([{% for algorithm, results in all_results.items %}{{ results.cost_reduction }},{% endfor %}]);
+      
+      const data = algorithms.map((algo, i) => ({
+        type: 'scatterpolar',
+        r: [executionTimes[i], pressureImprovements[i], costReductions[i], executionTimes[i]],
+        theta: metrics.concat([metrics[0]]),
+        fill: 'toself',
+        name: algo
+      }));
+      
+      const layout = {
+        polar: {
+          radialaxis: {
+            visible: true,
+            range: [0, 100]
+          }
+        },
+        showlegend: true
+      };
+      
+      Plotly.newPlot('performanceRadarChart', data, layout);
+    }
+    
+    // Initialize the best algorithm tab as active
+    document.addEventListener('DOMContentLoaded', function() {
+      const bestAlgo = '{{ best_algo.0 }}';
+      if (bestAlgo) {
+        document.querySelectorAll('.tab').forEach(tab => {
+          tab.classList.remove('active');
+          if (tab.getAttribute('data-algorithm') === bestAlgo) {
+            tab.classList.add('active');
+          }
+        });
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+          if (content.id === `${bestAlgo}-results`) {
+            content.classList.add('active');
+          }
+        });
+      }
+    });
   </script>
 </body>
 </html>
