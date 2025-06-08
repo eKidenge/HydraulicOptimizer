@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hydraulic Optimizer </title>
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
+<title>Hydraulic Optimizer</title>
 <style>
   /* Reset */
   *, *::before, *::after {
@@ -18,13 +18,14 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow-x: hidden;
   }
 
   /* Container */
   .dashboard {
     position: relative;
-    width: 100vw;
-    height: 100vh;
+    width: 95vw;
+    min-height: 95vh;
     max-width: 900px;
     background: #f7faf6;
     box-shadow: 0 8px 24px rgba(0,0,0,0.15);
@@ -32,7 +33,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding: 0 2rem 2rem;
+    padding: 0 1rem 1rem;
   }
 
   /* Pipe-themed background */
@@ -47,8 +48,8 @@
   header {
     background: #4a7c59;
     color: #e6f0e6;
-    padding: 2rem 2rem;
-    font-size: 2rem;
+    padding: 1.5rem 1rem;
+    font-size: clamp(1.5rem, 5vw, 2rem);
     font-weight: 700;
     letter-spacing: 1.2px;
     text-align: center;
@@ -60,49 +61,54 @@
 
   main {
     flex-grow: 1;
-    margin-top: 3rem;
+    margin-top: 1.5rem;
     z-index: 2;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    padding: 0 0.5rem;
+    overflow-y: auto;
   }
 
   main h2 {
     font-weight: 700;
-    font-size: 1.8rem;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
     color: #4a7c59;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     text-align: center;
     user-select: none;
+    padding: 0 0.5rem;
   }
 
   /* Form styling */
   form {
     display: flex;
     flex-direction: column;
-    gap: 1.8rem;
-    max-width: 450px;
+    gap: 1.2rem;
     width: 100%;
+    max-width: 450px;
     margin: 0 auto;
+    padding: 0 0.5rem;
   }
 
   label {
     font-weight: 600;
     color: #3a5d3a;
-    font-size: 1.1rem;
+    font-size: clamp(0.9rem, 3vw, 1.1rem);
     user-select: none;
   }
 
   input[type="file"] {
-    padding: 0.7rem 1rem;
+    padding: 0.6rem 0.8rem;
     border-radius: 12px;
     border: 2px solid #a3bfa0;
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 3vw, 1rem);
     cursor: pointer;
     background: #f0f8f0;
     color: #3a5d3a;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
   }
 
   input[type="file"]:focus {
@@ -114,13 +120,14 @@
 
   /* Optimization options container */
   .options-container {
-    display: none; /* Hidden until file is uploaded */
+    display: none;
     width: 100%;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
+    padding: 0 0.5rem;
   }
 
   .options-title {
-    font-size: 1.2rem;
+    font-size: clamp(1rem, 3.5vw, 1.2rem);
     font-weight: 600;
     color: #4a7c59;
     margin-bottom: 1rem;
@@ -130,15 +137,16 @@
   /* Optimization method cards */
   .method-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
   }
 
   .method-card {
     background: #ffffff;
     border-radius: 12px;
-    padding: 1.5rem;
+    padding: 1rem;
     border: 2px solid #d1e3ce;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -147,6 +155,7 @@
     align-items: center;
     position: relative;
     overflow: hidden;
+    width: 100%;
   }
 
   .method-card:hover {
@@ -164,16 +173,16 @@
   .method-card.selected::after {
     content: "✓";
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 8px;
+    right: 8px;
     color: #4a7c59;
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 
   .method-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+    font-size: clamp(1.8rem, 6vw, 2.5rem);
+    margin-bottom: 0.8rem;
     color: #4a7c59;
   }
 
@@ -181,7 +190,8 @@
     font-weight: 700;
     margin-bottom: 0.5rem;
     color: #2c3e50;
-    font-size: 1.2rem;
+    font-size: clamp(1rem, 3.5vw, 1.2rem);
+    text-align: center;
   }
 
   .method-abbr {
@@ -190,12 +200,12 @@
     color: white;
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
-    font-size: 0.8rem;
-    margin-bottom: 0.8rem;
+    font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+    margin-bottom: 0.6rem;
   }
 
   .method-desc {
-    font-size: 0.9rem;
+    font-size: clamp(0.8rem, 3vw, 0.9rem);
     color: #587e50;
     text-align: center;
     line-height: 1.4;
@@ -204,18 +214,19 @@
   /* Algorithm parameters */
   .parameters {
     width: 100%;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
     display: none;
   }
 
   .parameter-group {
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
+    width: 100%;
   }
 
   .parameter-group label {
     display: block;
     margin-bottom: 0.3rem;
-    font-size: 0.9rem;
+    font-size: clamp(0.8rem, 3vw, 0.9rem);
   }
 
   .parameter-group input {
@@ -223,6 +234,7 @@
     padding: 0.5rem;
     border: 1px solid #a3bfa0;
     border-radius: 6px;
+    font-size: clamp(0.8rem, 3vw, 0.9rem);
   }
 
   /* Buttons */
@@ -230,28 +242,30 @@
     background: #4a7c59;
     color: #e6f0e6;
     font-weight: 700;
-    font-size: 1.3rem;
-    padding: 0.85rem 0;
-    border-radius: 15px;
+    font-size: clamp(1rem, 3.5vw, 1.3rem);
+    padding: 0.7rem 0;
+    border-radius: 12px;
     border: none;
     cursor: pointer;
-    box-shadow: 0 6px 15px rgba(74,124,89,0.5);
+    box-shadow: 0 4px 12px rgba(74,124,89,0.5);
     user-select: none;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    margin: 0.3rem 0;
   }
 
   button:hover,
   button:focus {
     background: #346638;
-    box-shadow: 0 10px 25px rgba(52,102,56,0.75);
+    box-shadow: 0 6px 18px rgba(52,102,56,0.75);
     outline: none;
   }
 
   .secondary-btn {
     background: #aac7a1;
     color: #2c3e50;
-    font-size: 1rem;
-    padding: 0.7rem 1.5rem;
+    font-size: clamp(0.9rem, 3vw, 1rem);
+    padding: 0.6rem 1rem;
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
   }
 
@@ -264,22 +278,23 @@
   /* Form actions */
   .form-actions {
     display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: 1.5rem;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-top: 1.2rem;
+    width: 100%;
   }
 
   /* About button */
   .about-button {
     position: absolute;
-    top: 1.8rem;
-    right: 2rem;
+    top: 1rem;
+    right: 1rem;
     background: #aac7a1;
     border: none;
-    border-radius: 12px;
-    padding: 0.4rem 1rem;
+    border-radius: 10px;
+    padding: 0.3rem 0.8rem;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: clamp(0.8rem, 3vw, 1rem);
     color: #2c3e50;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
@@ -295,14 +310,15 @@
 
   footer {
     background: #ddebd9;
-    padding: 1rem 1.5rem;
+    padding: 0.8rem 1rem;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: clamp(0.7rem, 2.5vw, 0.9rem);
     color: #587e50;
     font-weight: 600;
     user-select: none;
     border-radius: 0 0 20px 20px;
     z-index: 2;
+    margin-top: auto;
   }
 
   /* Modal styles */
@@ -320,14 +336,15 @@
 
   .modal-content {
     background: #f7faf6;
-    margin: 8% auto;
-    padding: 2rem;
-    border-radius: 16px;
+    margin: 10% auto;
+    padding: 1.5rem;
+    border-radius: 12px;
+    width: 90%;
     max-width: 480px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     position: relative;
     color: #2c3e50;
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 3vw, 1rem);
     line-height: 1.5;
   }
 
@@ -335,13 +352,14 @@
     margin-top: 0;
     color: #4a7c59;
     font-weight: 700;
+    font-size: clamp(1.1rem, 4vw, 1.4rem);
   }
 
   .close-btn {
     position: absolute;
-    top: 0.6rem;
-    right: 1rem;
-    font-size: 1.8rem;
+    top: 0.5rem;
+    right: 0.8rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #4a7c59;
     background: none;
@@ -360,71 +378,51 @@
   /* File upload feedback */
   .file-feedback {
     margin-top: 0.5rem;
-    font-size: 0.9rem;
+    font-size: clamp(0.8rem, 3vw, 0.9rem);
     color: #4a7c59;
     font-weight: 500;
     display: none;
+    text-align: center;
   }
 
   /* Responsive adjustments */
-  @media (max-width: 600px) {
+  @media (min-width: 768px) {
     .dashboard {
-      border-radius: 0;
-      max-width: 100vw;
-      height: 100vh;
-      padding: 1rem 1.5rem 1.5rem;
+      padding: 0 1.5rem 1.5rem;
     }
-
+    
     header {
-      font-size: 1.6rem;
       padding: 1.5rem 1.5rem;
-      border-radius: 0;
     }
-
-    main h2 {
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    form {
-      max-width: 100%;
-      gap: 1.3rem;
-    }
-
+    
     .method-cards {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     }
-
+    
+    .form-actions {
+      flex-direction: row;
+    }
+    
     button {
-      font-size: 1.1rem;
-      padding: 0.75rem 0;
-      border-radius: 12px;
+      width: auto;
+      padding: 0.7rem 1.5rem;
     }
+  }
 
-    .about-button {
-      top: 1rem;
-      right: 1rem;
-      font-size: 0.9rem;
-      padding: 0.3rem 0.8rem;
+  @media (min-width: 992px) {
+    .dashboard {
+      height: 95vh;
     }
-
-    footer {
-      font-size: 0.8rem;
-      padding: 0.8rem 1rem;
-      border-radius: 0;
-    }
-
-    .modal-content {
-      margin: 15% 1rem;
-      max-width: calc(100% - 2rem);
-      padding: 1.5rem;
+    
+    main {
+      justify-content: center;
     }
   }
 </style>
 </head>
 <body>
+  <!-- Rest of your HTML remains exactly the same -->
   <div class="dashboard" role="main" aria-label="Hydraulic optimizer dashboard">
-
     <!-- Decorative pipes background -->
     <svg class="pipes-background" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 900 900" >
       <defs>
@@ -599,6 +597,11 @@
       // Show optimization options
       uploadForm.style.display = 'none';
       optionsContainer.style.display = 'block';
+      
+      // Ensure the content is scrolled to show the Run Optimization button
+      setTimeout(() => {
+        optimizeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
     } else {
       fileFeedback.textContent = 'Please select a file first';
       fileFeedback.style.display = 'block';
@@ -618,6 +621,10 @@
       const params = card.querySelector('.parameters');
       params.style.display = 'none';
     });
+    
+    // Reset file input
+    inpFile.value = '';
+    fileFeedback.style.display = 'none';
   });
 
   // Method selection handler
@@ -651,6 +658,9 @@
       }
       
       uploadForm.appendChild(methodInput);
+      
+      // Ensure the Run Optimization button is visible
+      optimizeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   });
 
@@ -680,6 +690,17 @@
       modal.style.display = 'none';
       aboutBtn.setAttribute('aria-expanded', 'false');
       aboutBtn.focus();
+    }
+  });
+
+  // Ensure the form is usable on small screens
+  window.addEventListener('resize', () => {
+    if (window.innerWidth < 768) {
+      // On small screens, make sure the form elements are properly sized
+      const formElements = document.querySelectorAll('input, button, select, textarea');
+      formElements.forEach(el => {
+        el.style.minHeight = '44px'; // Apple's recommended minimum touch target size
+      });
     }
   });
 </script>
