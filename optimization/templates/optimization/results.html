@@ -6,193 +6,421 @@
   <meta charset="UTF-8" />
   <title>Optimization Results</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f9f9f9;
-      color: #333;
-    }
-    h2, h3, h4 {
-      color: #222;
-      margin-top: 40px;
-      margin-bottom: 15px;
-    }
-    .table-container, .chart-container {
-      overflow-x: auto;
-      background: #fff;
-      padding: 15px 10px;
-      margin-bottom: 30px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      border-radius: 6px;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      min-width: 600px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px 15px;
-      text-align: right;
-      vertical-align: middle;
-      font-size: 0.95rem;
-    }
-    th {
-      background-color: #eee;
-      font-weight: 600;
-    }
-    td:first-child {
-      text-align: left;
-      font-weight: 500;
-    }
-    a {
-      margin-top: 40px;
-      display: inline-block;
-      text-decoration: none;
-      color: #007BFF;
-      font-weight: 600;
-      font-size: 1rem;
-      transition: color 0.3s ease;
-    }
-    a:hover {
-      color: #0056b3;
-    }
-    img {
-      max-width: 100%;
-      height: auto;
-      display: block;
-      margin: 20px 0 40px 0;
-      border: 1px solid #ddd;
-      padding: 6px;
-      background: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      border-radius: 6px;
-    }
-    ul {
-      background: #fff;
-      padding: 15px 20px;
-      list-style: square inside;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      border-radius: 6px;
-      font-size: 1rem;
-      line-height: 1.5;
-      max-width: 600px;
-    }
-    ul li {
-      margin-bottom: 8px;
+    :root {
+      --primary: #4361ee;
+      --primary-light: #e0e7ff;
+      --secondary: #3f37c9;
+      --success: #4cc9f0;
+      --success-light: #e0f7fe;
+      --danger: #f72585;
+      --warning: #f8961e;
+      --info: #4895ef;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gray: #6c757d;
+      --gray-light: #e9ecef;
+      --white: #ffffff;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+      --radius-sm: 0.25rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --transition: all 0.2s ease;
     }
     
-    /* Algorithm tabs styling */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      background-color: #f5f7fa;
+      color: var(--dark);
+      padding: 1rem;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    
+    h1, h2, h3, h4, h5 {
+      font-weight: 600;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      color: var(--dark);
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    h2 {
+      font-size: 1.75rem;
+      margin-top: 2.5rem;
+      margin-bottom: 1.25rem;
+    }
+    
+    h3 {
+      font-size: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    h4 {
+      font-size: 1.25rem;
+      margin-top: 1.5rem;
+    }
+    
+    p {
+      margin-bottom: 1rem;
+    }
+    
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    
+    a:hover {
+      color: var(--secondary);
+      text-decoration: underline;
+    }
+    
+    /* Cards */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    
+    .card-header {
+      background: var(--primary);
+      color: var(--white);
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+    }
+    
+    /* Tabs */
+    .tabs-container {
+      margin: 2rem 0;
+    }
+    
     .tabs {
       display: flex;
-      margin-bottom: 20px;
-      border-bottom: 1px solid #ddd;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
     }
+    
     .tab {
-      padding: 10px 20px;
+      padding: 0.75rem 1.5rem;
+      background: var(--gray-light);
+      border-radius: var(--radius-sm);
+      font-weight: 500;
       cursor: pointer;
-      background: #f1f1f1;
-      border: 1px solid #ddd;
-      border-bottom: none;
-      margin-right: 5px;
-      border-radius: 5px 5px 0 0;
-      font-weight: 600;
-      transition: all 0.3s ease;
+      transition: var(--transition);
+      border: 1px solid transparent;
     }
+    
     .tab:hover {
-      background: #e9e9e9;
+      background: var(--primary-light);
+      color: var(--primary);
     }
+    
     .tab.active {
-      background: #fff;
-      border-bottom: 1px solid #fff;
-      margin-bottom: -1px;
-      color: #007BFF;
+      background: var(--primary);
+      color: var(--white);
     }
+    
     .tab-content {
       display: none;
     }
+    
     .tab-content.active {
       display: block;
     }
-    .algorithm-info {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 6px;
-      margin-bottom: 20px;
-      border-left: 4px solid #007BFF;
-    }
-    .algorithm-info h4 {
-      margin-top: 0;
-      color: #007BFF;
-    }
-    .comparison-btn {
-      background: #28a745;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-bottom: 20px;
-      transition: background 0.3s ease;
-    }
-    .comparison-btn:hover {
-      background: #218838;
-    }
-    .comparison-section {
-      display: none;
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid #eee;
-    }
-    .best-algorithm {
-      background-color: #e6f7e6;
-      border-left: 4px solid #28a745;
-      padding: 15px;
-      margin: 20px 0;
-      border-radius: 4px;
-    }
-    .chart-row {
-      display: flex;
-      flex-wrap: wrap;
-      margin: 0 -10px;
-    }
-    .chart-col {
-      flex: 1;
-      min-width: 300px;
-      padding: 0 10px;
-      margin-bottom: 20px;
+    
+    /* Tables */
+    .table-responsive {
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
     }
     
-    @media (max-width: 640px) {
-      body {
-        margin: 10px;
-      }
-      h2, h3, h4 {
-        margin-top: 30px;
-      }
-      table {
-        min-width: 100%;
-      }
-      th, td {
-        padding: 8px 10px;
-        font-size: 0.9rem;
-      }
-      a {
-        font-size: 0.95rem;
-      }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--white);
+    }
+    
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-light);
+    }
+    
+    th {
+      background-color: var(--light);
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    tr:hover {
+      background-color: var(--primary-light);
+    }
+    
+    /* Charts */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    /* Metrics */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .metric-card {
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+    
+    .metric-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0.5rem 0;
+    }
+    
+    .metric-label {
+      font-size: 0.875rem;
+      color: var(--gray);
+    }
+    
+    /* Valve Cards */
+    .valve-card {
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--success);
+      transition: var(--transition);
+    }
+    
+    .valve-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .valve-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    
+    .valve-title {
+      font-weight: 600;
+      color: var(--dark);
+      margin: 0;
+    }
+    
+    .valve-priority {
+      background: var(--success);
+      color: var(--white);
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .valve-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .stat-item {
+      background: var(--light);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    /* Images */
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .image-card {
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .image-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    .image-caption {
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.875rem;
+      color: var(--gray);
+    }
+    
+    /* Alerts */
+    .alert {
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .alert-success {
+      background-color: var(--success-light);
+      border-left: 4px solid var(--success);
+    }
+    
+    .alert-icon {
+      margin-right: 1rem;
+      font-size: 1.5rem;
+    }
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: var(--white);
+    }
+    
+    .btn-primary:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+    }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background: var(--primary-light);
+    }
+    
+    /* Comparison Section */
+    .comparison-section {
+      display: none;
+      margin: 2rem 0;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
       .tabs {
-        flex-wrap: wrap;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 0.5rem;
       }
+      
       .tab {
-        padding: 8px 12px;
-        font-size: 0.9rem;
-        margin-bottom: 5px;
+        white-space: nowrap;
       }
-      .chart-col {
-        min-width: 100%;
+      
+      .valve-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      .metrics-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      .valve-stats {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -201,237 +429,379 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Load Plotly for additional charts -->
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <!-- Load Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-  <h2>Optimization Results</h2>
-  
-  <!-- Algorithm tabs navigation -->
-  <div class="tabs" id="algorithmTabs">
+  <div class="container">
+    <h1>Optimization Results</h1>
+    
+    <!-- Algorithm tabs navigation -->
+    <div class="tabs-container">
+      <div class="tabs" id="algorithmTabs">
+        {% for algorithm, results in all_results.items %}
+          <div class="tab {% if forloop.first %}active{% endif %}" data-algorithm="{{ algorithm }}">
+            {{ algorithm|upper }}
+          </div>
+        {% endfor %}
+        <button class="btn btn-outline" id="showComparison" style="margin-left: auto;">
+          <i class="fas fa-chart-bar" style="margin-right: 0.5rem;"></i> Compare All
+        </button>
+      </div>
+    </div>
+    
+    <!-- Determine best algorithm -->
+    {% with best_algo=all_results|dict_get_best_algorithm|default:all_results.items|first %}
+    <div class="alert alert-success">
+      <div class="alert-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div>
+        <h3 style="margin-top: 0;">Recommended Optimization</h3>
+        <p>Based on performance metrics, the <strong>{{ best_algo.0|upper }}</strong> algorithm provides the best balance of performance and efficiency.</p>
+        
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value">{{ best_algo.1.pressure_improvement|floatformat:2 }}%</div>
+            <div class="metric-label">Pressure Improvement</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">{{ best_algo.1.cost_reduction|floatformat:2 }}%</div>
+            <div class="metric-label">Cost Reduction</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">{{ best_algo.1.execution_time|floatformat:2 }}s</div>
+            <div class="metric-label">Execution Time</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endwith %}
+    
+    <!-- Comparison section -->
+    <div class="comparison-section" id="comparisonSection">
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-chart-pie" style="margin-right: 0.5rem;"></i> Algorithm Comparison
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table id="comparisonTable">
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  {% for algorithm in all_results.keys %}
+                    <th>{{ algorithm|upper }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Execution Time (s)</td>
+                  {% for algorithm, results in all_results.items %}
+                    <td>{{ results.execution_time|floatformat:2 }}</td>
+                  {% endfor %}
+                </tr>
+                <tr>
+                  <td>Pressure Improvement (%)</td>
+                  {% for algorithm, results in all_results.items %}
+                    <td>{{ results.pressure_improvement|floatformat:2 }}</td>
+                  {% endfor %}
+                </tr>
+                <tr>
+                  <td>Cost Reduction (%)</td>
+                  {% for algorithm, results in all_results.items %}
+                    <td>{{ results.cost_reduction|floatformat:2 }}</td>
+                  {% endfor %}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <h4>Performance Metrics Comparison</h4>
+          <div class="chart-container">
+            <canvas id="comparisonChart"></canvas>
+          </div>
+          
+          <h4>Normalized Performance Radar</h4>
+          <div class="chart-container">
+            <div id="performanceRadarChart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tab content for each algorithm -->
     {% for algorithm, results in all_results.items %}
-      <div class="tab {% if forloop.first %}active{% endif %}" data-algorithm="{{ algorithm }}">
-        {{ algorithm|upper }}
+      <div class="tab-content {% if forloop.first %}active{% endif %}" id="{{ algorithm }}-results">
+        <!-- Algorithm Summary -->
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-info-circle" style="margin-right: 0.5rem;"></i> {{ algorithm|upper }} Performance Summary
+          </div>
+          <div class="card-body">
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <div class="metric-value">{{ results.execution_time|floatformat:2 }}s</div>
+                <div class="metric-label">Execution Time</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">{{ results.pressure_improvement|floatformat:2 }}%</div>
+                <div class="metric-label">Pressure Improvement</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">{{ results.cost_reduction|floatformat:2 }}%</div>
+                <div class="metric-label">Cost Reduction</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">{{ results.valves|length }}</div>
+                <div class="metric-label">Valves Recommended</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Valve Recommendations -->
+        {% if results.valves %}
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-tint" style="margin-right: 0.5rem;"></i> Recommended Valve Locations
+          </div>
+          <div class="card-body">
+            <p>The following valve locations are recommended for optimal pressure management:</p>
+            
+            {% for valve in results.valves %}
+              <div class="valve-card">
+                <div class="valve-header">
+                  <h4 class="valve-title">{{ valve.link }}</h4>
+                  <span class="valve-priority">Priority {{ forloop.counter }}</span>
+                </div>
+                <p>Expected pressure reduction: <strong>{{ valve.pressure_reduction|floatformat:2 }} psi</strong></p>
+                <p>Flow impact: <strong>{{ valve.flow_impact|floatformat:4 }} m³/s</strong></p>
+                
+                <div class="valve-stats">
+                  <div class="stat-item">
+                    <div class="stat-value">{{ valve.upstream_pressure|floatformat:2 }}</div>
+                    <div class="stat-label">Upstream (psi)</div>
+                  </div>
+                  <div class="stat-item">
+                    <div class="stat-value">{{ valve.downstream_pressure|floatformat:2 }}</div>
+                    <div class="stat-label">Downstream (psi)</div>
+                  </div>
+                  <div class="stat-item">
+                    <div class="stat-value">{{ valve.flow_rate|floatformat:4 }}</div>
+                    <div class="stat-label">Flow (m³/s)</div>
+                  </div>
+                  <div class="stat-item">
+                    <div class="stat-value">{{ valve.cost_saving|floatformat:2 }}%</div>
+                    <div class="stat-label">Cost Saving</div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+        
+        <!-- Pressure Analysis -->
+        {% if results.pressure_summary %}
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-tachometer-alt" style="margin-right: 0.5rem;"></i> Pressure Analysis
+          </div>
+          <div class="card-body">
+            <div class="chart-grid">
+              <div>
+                <h4>Top 10 Nodes by Pressure</h4>
+                <div class="chart-container">
+                  <canvas id="{{ algorithm }}-pressureBarChart"></canvas>
+                </div>
+              </div>
+              <div>
+                <h4>Pressure Distribution</h4>
+                <div class="chart-container">
+                  <canvas id="{{ algorithm }}-pressurePieChart"></canvas>
+                </div>
+              </div>
+            </div>
+            
+            <h4>Detailed Pressure Statistics</h4>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Node</th>
+                    <th>Mean (psi)</th>
+                    <th>Min (psi)</th>
+                    <th>Max (psi)</th>
+                    <th>Std Dev</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for node in results.pressure_summary.mean_pressure.keys %}
+                    <tr>
+                      <td>{{ node }}</td>
+                      <td>{{ results.pressure_summary.mean_pressure|get:node|floatformat:2 }}</td>
+                      <td>{{ results.pressure_summary.min_pressure|get:node|floatformat:2 }}</td>
+                      <td>{{ results.pressure_summary.max_pressure|get:node|floatformat:2 }}</td>
+                      <td>{{ results.pressure_summary.std_pressure|get:node|floatformat:2 }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            
+            <h4>Pressure Histogram</h4>
+            <div class="chart-container">
+              <canvas id="{{ algorithm }}-pressureHistogram"></canvas>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        
+        <!-- Flowrate Analysis -->
+        {% if results.flowrate_summary %}
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-water" style="margin-right: 0.5rem;"></i> Flowrate Analysis
+          </div>
+          <div class="card-body">
+            <div class="chart-grid">
+              <div>
+                <h4>Top 10 Links by Flowrate</h4>
+                <div class="chart-container">
+                  <canvas id="{{ algorithm }}-flowrateBarChart"></canvas>
+                </div>
+              </div>
+              <div>
+                <h4>Flow Direction Distribution</h4>
+                <div class="chart-container">
+                  <canvas id="{{ algorithm }}-flowratePieChart"></canvas>
+                </div>
+              </div>
+            </div>
+            
+            <h4>Detailed Flowrate Statistics</h4>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Link</th>
+                    <th>Mean (m³/s)</th>
+                    <th>Min (m³/s)</th>
+                    <th>Max (m³/s)</th>
+                    <th>Std Dev</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for link in results.flowrate_summary.mean_flowrate.keys %}
+                    <tr>
+                      <td>{{ link }}</td>
+                      <td>{{ results.flowrate_summary.mean_flowrate|get:link|floatformat:4 }}</td>
+                      <td>{{ results.flowrate_summary.min_flowrate|get:link|floatformat:4 }}</td>
+                      <td>{{ results.flowrate_summary.max_flowrate|get:link|floatformat:4 }}</td>
+                      <td>{{ results.flowrate_summary.std_flowrate|get:link|floatformat:4 }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            
+            <h4>Flowrate Histogram</h4>
+            <div class="chart-container">
+              <canvas id="{{ algorithm }}-flowrateHistogram"></canvas>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        
+        <!-- Demand Analysis -->
+        {% if results.demand_summary %}
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-faucet" style="margin-right: 0.5rem;"></i> Demand Analysis
+          </div>
+          <div class="card-body">
+            <h4>Demand Distribution</h4>
+            <div class="chart-container">
+              <canvas id="{{ algorithm }}-demandPieChart"></canvas>
+            </div>
+            
+            <h4>Detailed Demand Statistics</h4>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Node</th>
+                    <th>Mean (m³/s)</th>
+                    <th>Min (m³/s)</th>
+                    <th>Max (m³/s)</th>
+                    <th>Std Dev</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for node in results.demand_summary.mean_demand.keys %}
+                    <tr>
+                      <td>{{ node }}</td>
+                      <td>{{ results.demand_summary.mean_demand|get:node|floatformat:4 }}</td>
+                      <td>{{ results.demand_summary.min_demand|get:node|floatformat:4 }}</td>
+                      <td>{{ results.demand_summary.max_demand|get:node|floatformat:4 }}</td>
+                      <td>{{ results.demand_summary.std_demand|get:node|floatformat:4 }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        
+        <!-- Network Visualizations -->
+        {% if results.plots %}
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-project-diagram" style="margin-right: 0.5rem;"></i> Network Visualizations
+          </div>
+          <div class="card-body">
+            <div class="image-grid">
+              {% if results.plots.pressure %}
+              <div class="image-card">
+                <img src="data:image/png;base64,{{ results.plots.pressure }}" alt="Pressure Plot">
+                <div class="image-caption">Pressure Distribution Across Network</div>
+              </div>
+              {% endif %}
+              
+              {% if results.plots.flowrate %}
+              <div class="image-card">
+                <img src="data:image/png;base64,{{ results.plots.flowrate }}" alt="Flowrate Plot">
+                <div class="image-caption">Flowrate Distribution Across Network</div>
+              </div>
+              {% endif %}
+              
+              {% if results.plots.demand %}
+              <div class="image-card">
+                <img src="data:image/png;base64,{{ results.plots.demand }}" alt="Demand Plot">
+                <div class="image-caption">Demand Distribution Across Network</div>
+              </div>
+              {% endif %}
+              
+              {% if results.plots.valve_locations %}
+              <div class="image-card">
+                <img src="data:image/png;base64,{{ results.plots.valve_locations }}" alt="Valve Locations">
+                <div class="image-caption">Recommended Valve Locations</div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
       </div>
     {% endfor %}
-    <button class="comparison-btn" id="showComparison">Compare All Algorithms</button>
+    
+    <a href="{% url 'index' %}" class="btn btn-primary" style="margin-top: 2rem;">
+      <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i> Back to Upload
+    </a>
   </div>
-  
-  <!-- Determine best algorithm -->
-  {% with best_algo=all_results|dict_get_best_algorithm|default:all_results.items|first %}
-  <div class="best-algorithm">
-    <h3>Recommended Optimization</h3>
-    <p>Based on performance metrics, the <strong>{{ best_algo.0|upper }}</strong> algorithm is recommended as it provides:</p>
-    <ul>
-      <li>{{ best_algo.1.pressure_improvement|floatformat:2 }}% pressure improvement</li>
-      <li>{{ best_algo.1.cost_reduction|floatformat:2 }}% cost reduction</li>
-      <li>Completed in {{ best_algo.1.execution_time|floatformat:2 }} seconds</li>
-    </ul>
-  </div>
-  {% endwith %}
-  
-  <!-- Comparison section -->
-  <div class="comparison-section" id="comparisonSection">
-    <h3>Algorithm Comparison</h3>
-    <div class="table-container">
-      <table id="comparisonTable">
-        <thead>
-          <tr>
-            <th>Metric</th>
-            {% for algorithm in all_results.keys %}
-              <th>{{ algorithm|upper }}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Execution Time (s)</td>
-            {% for algorithm, results in all_results.items %}
-              <td>{{ results.execution_time|floatformat:2 }}</td>
-            {% endfor %}
-          </tr>
-          <tr>
-            <td>Pressure Improvement (%)</td>
-            {% for algorithm, results in all_results.items %}
-              <td>{{ results.pressure_improvement|floatformat:2 }}</td>
-            {% endfor %}
-          </tr>
-          <tr>
-            <td>Cost Reduction (%)</td>
-            {% for algorithm, results in all_results.items %}
-              <td>{{ results.cost_reduction|floatformat:2 }}</td>
-            {% endfor %}
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="chart-container">
-      <canvas id="comparisonChart" height="300"></canvas>
-    </div>
-    <div id="performanceRadarChart" class="chart-container"></div>
-  </div>
-  
-  <!-- Tab content for each algorithm -->
-  {% for algorithm, results in all_results.items %}
-    <div class="tab-content {% if forloop.first %}active{% endif %}" id="{{ algorithm }}-results">
-      <div class="algorithm-info">
-        <h4>{{ algorithm|upper }} Optimization</h4>
-        <p>Execution time: <strong>{{ results.execution_time|floatformat:2 }} seconds</strong></p>
-        <p>Pressure improvement: <strong>{{ results.pressure_improvement|floatformat:2 }}%</strong></p>
-        <p>Cost reduction: <strong>{{ results.cost_reduction|floatformat:2 }}%</strong></p>
-      </div>
-      
-      <div class="chart-row">
-        <div class="chart-col">
-          <h4>Top 10 Nodes by Pressure</h4>
-          <div class="chart-container">
-            <canvas id="{{ algorithm }}-pressureBarChart" height="300"></canvas>
-          </div>
-        </div>
-        <div class="chart-col">
-          <h4>Pressure Distribution</h4>
-          <div class="chart-container">
-            <canvas id="{{ algorithm }}-pressurePieChart" height="300"></canvas>
-          </div>
-        </div>
-      </div>
-      
-      <div class="chart-row">
-        <div class="chart-col">
-          <h4>Top 10 Links by Flowrate</h4>
-          <div class="chart-container">
-            <canvas id="{{ algorithm }}-flowrateBarChart" height="300"></canvas>
-          </div>
-        </div>
-        <div class="chart-col">
-          <h4>Flowrate Distribution</h4>
-          <div class="chart-container">
-            <canvas id="{{ algorithm }}-flowratePieChart" height="300"></canvas>
-          </div>
-        </div>
-      </div>
-      
-      {% if results.pressure_summary %}
-        <h3>Pressure Summary</h3>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Node</th>
-                <th>Mean (psi)</th>
-                <th>Min (psi)</th>
-                <th>Max (psi)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for node in results.pressure_summary.mean_pressure.keys %}
-                <tr>
-                  <td>{{ node }}</td>
-                  <td>{{ results.pressure_summary.mean_pressure|get:node|floatformat:2 }}</td>
-                  <td>{{ results.pressure_summary.min_pressure|get:node|floatformat:2 }}</td>
-                  <td>{{ results.pressure_summary.max_pressure|get:node|floatformat:2 }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        
-        <h4>Pressure Histogram</h4>
-        <div class="chart-container">
-          <canvas id="{{ algorithm }}-pressureHistogram" height="300"></canvas>
-        </div>
-      {% endif %}
-
-      {% if results.flowrate_summary %}
-        <h3>Flowrate Summary</h3>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Link</th>
-                <th>Mean (m³/s)</th>
-                <th>Min (m³/s)</th>
-                <th>Max (m³/s)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for link in results.flowrate_summary.mean_flowrate.keys %}
-                <tr>
-                  <td>{{ link }}</td>
-                  <td>{{ results.flowrate_summary.mean_flowrate|get:link|floatformat:4 }}</td>
-                  <td>{{ results.flowrate_summary.min_flowrate|get:link|floatformat:4 }}</td>
-                  <td>{{ results.flowrate_summary.max_flowrate|get:link|floatformat:4 }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        
-        <h4>Flowrate Histogram</h4>
-        <div class="chart-container">
-          <canvas id="{{ algorithm }}-flowrateHistogram" height="300"></canvas>
-        </div>
-      {% endif %}
-
-      {% if results.demand_summary %}
-        <h3>Demand Summary</h3>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Node</th>
-                <th>Mean (m³/s)</th>
-                <th>Min (m³/s)</th>
-                <th>Max (m³/s)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for node in results.demand_summary.mean_demand.keys %}
-                <tr>
-                  <td>{{ node }}</td>
-                  <td>{{ results.demand_summary.mean_demand|get:node|floatformat:4 }}</td>
-                  <td>{{ results.demand_summary.min_demand|get:node|floatformat:4 }}</td>
-                  <td>{{ results.demand_summary.max_demand|get:node|floatformat:4 }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        
-        <h4>Demand Distribution</h4>
-        <div class="chart-container">
-          <canvas id="{{ algorithm }}-demandPieChart" height="300"></canvas>
-        </div>
-      {% endif %}
-
-      {% if results.valves %}
-        <h3>Recommended Valve Locations</h3>
-        <ul>
-          {% for link in results.valves %}
-            <li><strong>{{ link }}</strong></li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-
-      {% if results.plots %}
-        <h3>Network Visualizations</h3>
-        <div class="chart-row">
-          {% if results.plots.pressure %}
-            <div class="chart-col">
-              <h4>Pressure Map</h4>
-              <img src="{{ results.plots.pressure }}" alt="Pressure Plot" loading="lazy">
-            </div>
-          {% endif %}
-          {% if results.plots.flowrate %}
-            <div class="chart-col">
-              <h4>Flowrate Map</h4>
-              <img src="{{ results.plots.flowrate }}" alt="Flowrate Plot" loading="lazy">
-            </div>
-          {% endif %}
-        </div>
-      {% endif %}
-    </div>
-  {% endfor %}
-
-  <a href="{% url 'index' %}">← Back to Upload</a>
 
   <script>
     // Tab switching functionality
@@ -454,14 +824,75 @@
       const comparisonSection = document.getElementById('comparisonSection');
       if (comparisonSection.style.display === 'block') {
         comparisonSection.style.display = 'none';
-        this.textContent = 'Compare All Algorithms';
+        this.innerHTML = '<i class="fas fa-chart-bar" style="margin-right: 0.5rem;"></i> Compare All';
       } else {
         comparisonSection.style.display = 'block';
-        this.textContent = 'Hide Comparison';
+        this.innerHTML = '<i class="fas fa-times" style="margin-right: 0.5rem;"></i> Hide Comparison';
         renderComparisonChart();
         renderRadarChart();
       }
     });
+    
+    // Chart configuration
+    const chartColors = {
+      primary: 'rgba(67, 97, 238, 0.8)',
+      success: 'rgba(76, 201, 240, 0.8)',
+      danger: 'rgba(247, 37, 133, 0.8)',
+      warning: 'rgba(248, 150, 30, 0.8)',
+      info: 'rgba(72, 149, 239, 0.8)',
+      gray: 'rgba(108, 117, 125, 0.8)'
+    };
+    
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            font: {
+              family: 'Inter'
+            }
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          titleFont: {
+            family: 'Inter',
+            size: 14
+          },
+          bodyFont: {
+            family: 'Inter',
+            size: 12
+          },
+          padding: 10,
+          cornerRadius: 4
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.05)'
+          },
+          ticks: {
+            font: {
+              family: 'Inter'
+            }
+          }
+        },
+        x: {
+          grid: {
+            color: 'rgba(0, 0, 0, 0.05)'
+          },
+          ticks: {
+            font: {
+              family: 'Inter'
+            }
+          }
+        }
+      }
+    };
     
     // Render charts for each algorithm
     {% for algorithm, results in all_results.items %}
@@ -477,24 +908,54 @@
           .map(item => item[1]);
         
         new Chart(
-          document.getElementById('{{ algorithm }}-pressureBarChart').getContext('2d'), {
+          document.getElementById('{{ algorithm }}-pressureBarChart'), {
             type: 'bar',
             data: {
               labels: {{ algorithm }}TopPressureLabels,
               datasets: [{
                 label: 'Pressure (psi)',
                 data: {{ algorithm }}TopPressureValues,
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: chartColors.primary,
+                borderColor: chartColors.primary,
                 borderWidth: 1
               }]
             },
             options: {
-              responsive: true,
+              ...chartOptions,
+              plugins: {
+                ...chartOptions.plugins,
+                title: {
+                  display: true,
+                  text: 'Top 10 Nodes by Pressure',
+                  font: {
+                    size: 16,
+                    family: 'Inter'
+                  }
+                }
+              },
               scales: {
+                ...chartOptions.scales,
                 y: {
-                  beginAtZero: true,
-                  title: { display: true, text: 'Pressure (psi)' }
+                  ...chartOptions.scales.y,
+                  title: {
+                    display: true,
+                    text: 'Pressure (psi)',
+                    font: {
+                      family: 'Inter',
+                      weight: 'bold'
+                    }
+                  }
+                },
+                x: {
+                  ...chartOptions.scales.x,
+                  title: {
+                    display: true,
+                    text: 'Node ID',
+                    font: {
+                      family: 'Inter',
+                      weight: 'bold'
+                    }
+                  }
                 }
               }
             }
@@ -511,42 +972,90 @@
         };
         
         new Chart(
-          document.getElementById('{{ algorithm }}-pressurePieChart').getContext('2d'), {
+          document.getElementById('{{ algorithm }}-pressurePieChart'), {
             type: 'pie',
             data: {
               labels: Object.keys({{ algorithm }}PressureBins),
               datasets: [{
                 data: Object.values({{ algorithm }}PressureBins),
                 backgroundColor: [
-                  'rgba(255, 99, 132, 0.6)',
-                  'rgba(54, 162, 235, 0.6)',
-                  'rgba(255, 206, 86, 0.6)',
-                  'rgba(75, 192, 192, 0.6)',
-                  'rgba(153, 102, 255, 0.6)'
-                ]
+                  chartColors.danger,
+                  chartColors.primary,
+                  chartColors.success,
+                  chartColors.warning,
+                  chartColors.info
+                ],
+                borderColor: 'rgba(255, 255, 255, 0.8)',
+                borderWidth: 1
               }]
+            },
+            options: {
+              ...chartOptions,
+              plugins: {
+                ...chartOptions.plugins,
+                title: {
+                  display: true,
+                  text: 'Pressure Distribution',
+                  font: {
+                    size: 16,
+                    family: 'Inter'
+                  }
+                }
+              }
             }
           }
         );
         
         // Pressure Histogram
         new Chart(
-          document.getElementById('{{ algorithm }}-pressureHistogram').getContext('2d'), {
+          document.getElementById('{{ algorithm }}-pressureHistogram'), {
             type: 'histogram',
             data: {
               datasets: [{
                 label: 'Pressure Distribution',
                 data: Object.values({{ results.pressure_summary.mean_pressure|safe }}),
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: chartColors.primary,
+                borderColor: chartColors.primary,
                 borderWidth: 1
               }]
             },
             options: {
-              responsive: true,
+              ...chartOptions,
+              plugins: {
+                ...chartOptions.plugins,
+                title: {
+                  display: true,
+                  text: 'Pressure Histogram',
+                  font: {
+                    size: 16,
+                    family: 'Inter'
+                  }
+                }
+              },
               scales: {
-                y: { title: { display: true, text: 'Frequency' } },
-                x: { title: { display: true, text: 'Pressure (psi)' } }
+                ...chartOptions.scales,
+                y: {
+                  ...chartOptions.scales.y,
+                  title: {
+                    display: true,
+                    text: 'Frequency',
+                    font: {
+                      family: 'Inter',
+                      weight: 'bold'
+                    }
+                  }
+                },
+                x: {
+                  ...chartOptions.scales.x,
+                  title: {
+                    display: true,
+                    text: 'Pressure (psi)',
+                    font: {
+                      family: 'Inter',
+                      weight: 'bold'
+                    }
+                  }
+                }
               }
             }
           }
@@ -565,23 +1074,54 @@
           .map(item => item[1]);
         
         new Chart(
-          document.getElementById('{{ algorithm }}-flowrateBarChart').getContext('2d'), {
+          document.getElementById('{{ algorithm }}-flowrateBarChart'), {
             type: 'bar',
             data: {
               labels: {{ algorithm }}TopFlowrateLabels,
               datasets: [{
                 label: 'Flowrate (m³/s)',
                 data: {{ algorithm }}TopFlowrateValues,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: chartColors.success,
+                borderColor: chartColors.success,
                 borderWidth: 1
               }]
             },
             options: {
-              responsive: true,
+              ...chartOptions,
+              plugins: {
+                ...chartOptions.plugins,
+                title: {
+                  display: true,
+                  text: 'Top 10 Links by Flowrate',
+                  font: {
+                    size: 16,
+                    family: 'Inter'
+                  }
+                }
+              },
               scales: {
+                ...chartOptions.scales,
                 y: {
-                  title: { display: true, text: 'Flowrate (m³/s)' }
+                  ...chartOptions.scales.y,
+                  title: {
+                    display: true,
+                    text: 'Flowrate (m³/s)',
+                    font: {
+                      family: 'Inter',
+                      weight: 'bold'
+                    }
+                  }
+                },
+                x: {
+                  ...chartOptions.scales.x,
+                  title: {
+                    display: true,
+                    text: 'Link ID',
+                    font: {
+                      family: 'Inter',
+                      weight: 'bold'
+                    }
+                  }
                 }
               }
             }
@@ -596,40 +1136,88 @@
         };
         
         new Chart(
-          document.getElementById('{{ algorithm }}-flowratePieChart').getContext('2d'), {
+          document.getElementById('{{ algorithm }}-flowratePieChart'), {
             type: 'pie',
             data: {
               labels: Object.keys({{ algorithm }}FlowDirection),
               datasets: [{
                 data: Object.values({{ algorithm }}FlowDirection),
                 backgroundColor: [
-                  'rgba(54, 162, 235, 0.6)',
-                  'rgba(255, 99, 132, 0.6)',
-                  'rgba(201, 203, 207, 0.6)'
-                ]
+                  chartColors.primary,
+                  chartColors.danger,
+                  chartColors.gray
+                ],
+                borderColor: 'rgba(255, 255, 255, 0.8)',
+                borderWidth: 1
               }]
+            },
+            options: {
+              ...chartOptions,
+              plugins: {
+                ...chartOptions.plugins,
+                title: {
+                  display: true,
+                  text: 'Flow Direction Distribution',
+                  font: {
+                    size: 16,
+                    family: 'Inter'
+                  }
+                }
+              }
             }
           }
         );
         
         // Flowrate Histogram
         new Chart(
-          document.getElementById('{{ algorithm }}-flowrateHistogram').getContext('2d'), {
+          document.getElementById('{{ algorithm }}-flowrateHistogram'), {
             type: 'histogram',
             data: {
               datasets: [{
                 label: 'Flowrate Distribution',
                 data: Object.values({{ results.flowrate_summary.mean_flowrate|safe }}),
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: chartColors.success,
+                borderColor: chartColors.success,
                 borderWidth: 1
               }]
             },
             options: {
-              responsive: true,
+              ...chartOptions,
+              plugins: {
+                ...chartOptions.plugins,
+                title: {
+                  display: true,
+                  text: 'Flowrate Histogram',
+                  font: {
+                    size: 16,
+                    family: 'Inter'
+                  }
+                }
+              },
               scales: {
-                y: { title: { display: true, text: 'Frequency' } },
-                x: { title: { display: true, text: 'Flowrate (m³/s)' } }
+                ...chartOptions.scales,
+                y: {
+                  ...chartOptions.scales.y,
+                  title: {
+                    display: true,
+                    text: 'Frequency',
+                    font: {
+                      family: 'Inter',
+                      weight: 'bold'
+                    }
+                  }
+                },
+                x: {
+                  ...chartOptions.scales.x,
+                  title: {
+                    display: true,
+                    text: 'Flowrate (m³/s)',
+                    font: {
+                      family: 'Inter',
+                      weight: 'bold'
+                    }
+                  }
+                }
               }
             }
           }
@@ -645,18 +1233,34 @@
         };
         
         new Chart(
-          document.getElementById('{{ algorithm }}-demandPieChart').getContext('2d'), {
+          document.getElementById('{{ algorithm }}-demandPieChart'), {
             type: 'pie',
             data: {
               labels: Object.keys({{ algorithm }}DemandBins),
               datasets: [{
                 data: Object.values({{ algorithm }}DemandBins),
                 backgroundColor: [
-                  'rgba(54, 162, 235, 0.6)',
-                  'rgba(255, 206, 86, 0.6)',
-                  'rgba(255, 99, 132, 0.6)'
-                ]
+                  chartColors.primary,
+                  chartColors.warning,
+                  chartColors.danger
+                ],
+                borderColor: 'rgba(255, 255, 255, 0.8)',
+                borderWidth: 1
               }]
+            },
+            options: {
+              ...chartOptions,
+              plugins: {
+                ...chartOptions.plugins,
+                title: {
+                  display: true,
+                  text: 'Demand Distribution',
+                  font: {
+                    size: 16,
+                    family: 'Inter'
+                  }
+                }
+              }
             }
           }
         );
@@ -679,34 +1283,61 @@
             {
               label: 'Execution Time (s)',
               data: executionTimes,
-              backgroundColor: 'rgba(54, 162, 235, 0.6)',
-              borderColor: 'rgba(54, 162, 235, 1)',
+              backgroundColor: chartColors.primary,
+              borderColor: chartColors.primary,
               borderWidth: 1
             },
             {
               label: 'Pressure Improvement (%)',
               data: pressureImprovements,
-              backgroundColor: 'rgba(75, 192, 192, 0.6)',
-              borderColor: 'rgba(75, 192, 192, 1)',
+              backgroundColor: chartColors.success,
+              borderColor: chartColors.success,
               borderWidth: 1
             },
             {
               label: 'Cost Reduction (%)',
               data: costReductions,
-              backgroundColor: 'rgba(255, 99, 132, 0.6)',
-              borderColor: 'rgba(255, 99, 132, 1)',
+              backgroundColor: chartColors.danger,
+              borderColor: chartColors.danger,
               borderWidth: 1
             }
           ]
         },
         options: {
-          responsive: true,
+          ...chartOptions,
+          plugins: {
+            ...chartOptions.plugins,
+            title: {
+              display: true,
+              text: 'Algorithm Performance Comparison',
+              font: {
+                size: 16,
+                family: 'Inter'
+              }
+            }
+          },
           scales: {
+            ...chartOptions.scales,
             y: {
-              beginAtZero: true,
+              ...chartOptions.scales.y,
               title: {
                 display: true,
-                text: 'Value'
+                text: 'Value',
+                font: {
+                  family: 'Inter',
+                  weight: 'bold'
+                }
+              }
+            },
+            x: {
+              ...chartOptions.scales.x,
+              title: {
+                display: true,
+                text: 'Algorithm',
+                font: {
+                  family: 'Inter',
+                  weight: 'bold'
+                }
               }
             }
           }
@@ -739,20 +1370,35 @@
         r: [executionTimes[i], pressureImprovements[i], costReductions[i], executionTimes[i]],
         theta: metrics.concat([metrics[0]]),
         fill: 'toself',
-        name: algo
+        name: algo,
+        marker: { size: 5 },
+        line: { width: 2 }
       }));
       
       const layout = {
         polar: {
           radialaxis: {
             visible: true,
-            range: [0, 100]
+            range: [0, 100],
+            tickfont: { size: 10 }
+          },
+          angularaxis: {
+            tickfont: { size: 12 }
           }
         },
-        showlegend: true
+        showlegend: true,
+        legend: {
+          orientation: 'h',
+          y: -0.1,
+          font: {
+            family: 'Inter'
+          }
+        },
+        margin: { t: 30, l: 80, r: 80, b: 80 },
+        font: { family: 'Inter, sans-serif' }
       };
       
-      Plotly.newPlot('performanceRadarChart', data, layout);
+      Plotly.newPlot('performanceRadarChart', data, layout, { responsive: true });
     }
     
     // Initialize the best algorithm tab as active
@@ -772,6 +1418,12 @@
           }
         });
       }
+      
+      // Initialize tooltips
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
     });
   </script>
 </body>
